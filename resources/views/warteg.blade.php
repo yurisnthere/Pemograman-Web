@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warteg App</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-100 p-6">
+
+  <!-- LOGIN PAGE -->
+  <div id="loginPage" class="max-w-sm mx-auto bg-white p-6 rounded-lg shadow">
+    <h2 class="text-xl font-bold mb-4">Login</h2>
+
+    <input id="username" class="w-full border p-2 mb-3 rounded" placeholder="username">
+    <input id="password" type="password" class="w-full border p-2 mb-3 rounded" placeholder="password">
+
+    <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-2 rounded">
+      Login
+    </button>
+  </div>
+
+  <!-- MAIN PAGE -->
+  <div id="mainPage" class="hidden max-w-lg mx-auto">
+
+    <h2 class="text-2xl font-bold mb-4 text-center">Warteg Menu</h2>
+
+    <!-- MENU LIST -->
+    <div id="menu-list" class="grid gap-3"></div>
+
+    <!-- USER CART -->
+    <div id="cartSection" class="hidden mt-6 bg-white p-4 rounded shadow">
+      <h3 class="font-bold mb-2">Keranjang</h3>
+      <ul id="cartList" class="list-disc ml-5"></ul>
+
+      <button onclick="submitOrder()" class="w-full mt-3 bg-green-600 text-white py-2 rounded">
+        Buat Pesanan
+      </button>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminSection" class="hidden mt-8 bg-white p-4 rounded shadow">
+      <h3 class="font-bold mb-4">Admin Panel</h3>
+
+      <input id="itemName" class="w-full border p-2 mb-3 rounded" placeholder="Nama Menu">
+      <input id="itemPrice" class="w-full border p-2 mb-3 rounded" placeholder="Harga">
+
+      <button onclick="saveMenuItem()" class="w-full bg-orange-600 py-2 text-white rounded">
+        Simpan Menu
+      </button>
+
+      <h4 class="font-bold mt-4 mb-2">Edit/Hapus</h4>
+      <ul id="adminList"></ul>
+    </div>
+
+  </div>
+
+  <!-- JS (taruh PALING BAWAH) -->
+  <script src="/js/app.js"></script>
+
+</body>
+</html>

@@ -6,6 +6,8 @@ console.log("app.js loaded");
 let currentUser = null;
 let menuItems = [];
 let cart = [];
+let editingId = null;
+
 
 // ======================
 // LOGIN
@@ -43,6 +45,11 @@ async function handleLogin() {
 function showMainPage() {
   document.getElementById("loginPage").classList.add("hidden");
   document.getElementById("mainPage").classList.remove("hidden");
+
+  if (currentUser.role === "admin") {
+    document.getElementById("adminSection").classList.remove("hidden");
+  }
+
   fetchMenu();
 }
 
@@ -53,7 +60,9 @@ async function fetchMenu() {
   const res = await fetch("/api/menu");
   menuItems = await res.json();
   renderMenu();
+  if (currentUser.role === "admin") renderAdminList();
 }
+
 
 // ======================
 // RENDER MENU
@@ -101,3 +110,94 @@ function renderCart() {
     list.appendChild(li);
   });
 }
+
+async function saveMenuItem() {
+  const name = document.getElementById("itemName").value.trim();
+  const price = parseInt(document.getElementById("itemPrice").value);
+
+  if (!name || isNaN(price)) {
+    alert("Nama & harga wajib diisi");
+    return;
+  }
+
+  const payload = { name, price };
+
+  if (editingId) {
+    await fetch(`/api/menu/${editingId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    editingId = null;
+  } else {
+    await fetch("/api/menu", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  document.getElementById("itemName").value = "";
+  document.getElementById("itemPrice").value = "";
+
+  fetchMenu();
+}
+
+
+function renderAdminList() {
+  const list = document.getElementById("adminList");
+  list.innerHTML = "";
+
+  menuItems.forEach(item => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${item.name} - Rp ${item.price}
+      <button onclick="editItem(${item.id})" class="ml-2 text-blue-600">Edit</button>
+      <button onclick="deleteItem(${item.id})" class="ml-2 text-red-600">Hapus</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+
+function editItem(id) {
+  const item = menuItems.find(i => i.id === id);
+  editingId = id;
+
+  document.getElementById("itemName").value = item.name;
+  document.getElementById("itemPrice").value = item.price;
+}
+
+
+async function deleteItem(id) {
+  if (!confirm("Yakin hapus menu?")) return;
+
+  await fetch(`/api/menu/${id}`, { method: "DELETE" });
+  fetchMenu();
+}
+
+
+async function submitOrder() {
+  if (cart.length === 0) {
+    alert("Keranjang kosong");
+    return;
+  }
+
+  const total = cart.reduce((sum, i) => sum + i.price, 0);
+
+  await fetch("/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: currentUser.id,
+      items: cart,
+      total
+    })
+  });
+
+  alert("Pesanan berhasil dibuat 🎉");
+  cart = [];
+  renderCart();
+}
+
+

@@ -1,0 +1,5 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#f3f4f6"/>
+  <text x="50%" y="45%" text-anchor="middle" fill="#9ca3af" font-size="48" font-family="Arial">🍽️</text>
+  <text x="50%" y="65%" text-anchor="middle" fill="#9ca3af" font-size="14" font-family="Arial">No Image</text>
+</svg>

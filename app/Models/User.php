@@ -18,6 +18,8 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'name',
+        'email',
         'username',
         'password',
         'role',
@@ -35,4 +37,10 @@ class User extends Authenticatable
     ];
 
     public $timestamps = true;
+
+    // Relationships
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

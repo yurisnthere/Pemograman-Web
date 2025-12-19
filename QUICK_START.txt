@@ -1,0 +1,114 @@
+╔══════════════════════════════════════════════════════════════╗
+║          🍛 WARUNG MAKAN SEDERHANA - QUICK START 🍛          ║
+╚══════════════════════════════════════════════════════════════╝
+
+📌 SETUP DATABASE (Jalankan sekali saja di terminal PowerShell):
+
+1️⃣  php artisan migrate:fresh
+    └─ Membuat ulang semua tabel database
+
+2️⃣  php artisan db:seed
+    └─ Mengisi database dengan data awal
+
+3️⃣  php artisan storage:link
+    └─ Membuat link storage untuk upload gambar
+
+4️⃣  php artisan serve
+    └─ Menjalankan server Laravel
+
+5️⃣  Buka browser: http://localhost:8000/warteg
+    └─ Atau: http://project-web.test/warteg (jika pakai Laragon)
+
+═══════════════════════════════════════════════════════════════
+
+🔑 AKUN LOGIN DEFAULT:
+
+   👨‍💼 ADMIN
+   Username: admin
+   Password: admin123
+
+   👤 USER
+   Username: user
+   Password: user123
+
+═══════════════════════════════════════════════════════════════
+
+✨ FITUR UTAMA:
+
+📱 USER:
+   ✅ Registrasi & Login
+   🍽️ Browse Menu (dengan gambar)
+   🛒 Keranjang Belanja
+   🎁 Gunakan Kode Promo
+   🔄 Pesanan Berlangsung
+   📜 Riwayat Pesanan
+   🎉 Lihat Promo Tersedia
+
+👨‍💼 ADMIN:
+   📋 Kelola Menu (CRUD + Upload Gambar)
+   📦 Kelola Pesanan (Proses/Tolak/Selesai)
+   🎁 Kelola Promo (CRUD + Toggle)
+
+═══════════════════════════════════════════════════════════════
+
+🎁 KODE PROMO DEMO:
+
+   • HEMAT10      → 10% diskon (min. 20rb)
+   • SPESIAL20    → 20% diskon (min. 50rb)
+   • GRATISONGKIR → 5% diskon (no minimum)
+
+═══════════════════════════════════════════════════════════════
+
+📚 DOKUMENTASI LENGKAP:
+
+   • SETUP_INSTRUCTIONS.md  → Panduan instalasi detail
+   • CHANGELOG.md           → Daftar perubahan lengkap
+   • README.md              → Dokumentasi project
+
+═══════════════════════════════════════════════════════════════
+
+🆘 TROUBLESHOOTING:
+
+❌ Error "Target class does not exist"
+   → php artisan optimize:clear
+
+❌ Error database connection
+   → Cek file .env, pastikan database sudah dibuat
+
+❌ Menu tidak muncul
+   → Pastikan sudah run: php artisan db:seed
+
+❌ Error 404
+   → Pastikan akses URL: /warteg (bukan root)
+
+❌ Gambar tidak muncul
+   → Pastikan sudah run: php artisan storage:link
+   → Cek folder storage/app/public/menu sudah ada
+
+═══════════════════════════════════════════════════════════════
+
+💡 TIPS:
+
+1. Gunakan terminal PowerShell di VS Code
+2. Pastikan MySQL service running
+3. Jangan lupa migrate & seed sebelum testing
+4. Coba login sebagai admin dulu untuk explore fitur
+
+═══════════════════════════════════════════════════════════════
+
+🎯 TESTING FLOW:
+
+1️⃣  Login sebagai ADMIN → Tambah menu & promo
+2️⃣  Logout → Register user baru
+3️⃣  Login sebagai USER → Pesan makanan dengan promo
+4️⃣  Login kembali sebagai ADMIN → Proses pesanan
+5️⃣  Login sebagai USER → Cek status di "Pesanan Berlangsung"
+
+═══════════════════════════════════════════════════════════════
+
+✅ STATUS: SIAP DIGUNAKAN!
+
+Semua fitur telah diimplementasikan dan ditest.
+Happy coding! 🚀
+
+═══════════════════════════════════════════════════════════════

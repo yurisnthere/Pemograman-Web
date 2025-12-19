@@ -3,35 +3,47 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
-
-Route::get('/menu', [MenuController::class, 'getMenu']);
-Route::post('/menu', [MenuController::class, 'store']);
-Route::put('/menu/{id}', [MenuController::class, 'update']);
-Route::delete('/menu/{id}', [MenuController::class, 'destroy']);
-Route::post('/login', [UserController::class, 'login']);
-Route::post('/orders', [OrderController::class, 'create']);
-
-Route::post('/login', [UserController::class, 'login']);
-Route::post('/orders', [OrderController::class, 'create']);
-
+use App\Http\Controllers\PromoController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Authentication Routes
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout']);
 
+// Menu Routes
+Route::get('/menu', [MenuController::class, 'getMenu']);
+Route::post('/menu', [MenuController::class, 'store']);
+Route::put('/menu/{id}', [MenuController::class, 'update']);
+Route::delete('/menu/{id}', [MenuController::class, 'destroy']);
+
+// Order Routes
+Route::post('/orders', [OrderController::class, 'create']);
+Route::get('/orders', [OrderController::class, 'index']); // All orders (admin)
+Route::get('/orders/user/{userId}', [OrderController::class, 'getUserOrders']);
+Route::get('/orders/user/{userId}/ongoing', [OrderController::class, 'getOngoingOrders']);
+Route::get('/orders/user/{userId}/history', [OrderController::class, 'getOrderHistory']);
+Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+Route::put('/orders/{id}/process', [OrderController::class, 'process']);
+Route::put('/orders/{id}/complete', [OrderController::class, 'complete']);
+Route::put('/orders/{id}/reject', [OrderController::class, 'reject']);
+
+// Promo Routes
+Route::get('/promos', [PromoController::class, 'index']); // Active promos
+Route::get('/promos/all', [PromoController::class, 'all']); // All promos (admin)
+Route::post('/promos', [PromoController::class, 'store']);
+Route::put('/promos/{id}', [PromoController::class, 'update']);
+Route::delete('/promos/{id}', [PromoController::class, 'destroy']);
+Route::put('/promos/{id}/toggle', [PromoController::class, 'toggleStatus']);
+Route::post('/promos/validate', [PromoController::class, 'validatePromo']);
 
 

@@ -14,10 +14,17 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'items',
-        'total'
+        'total',
+        'status'
     ];
 
     protected $casts = [
         'items' => 'array'
     ];
+
+    // Relationships
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

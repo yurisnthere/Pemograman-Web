@@ -10,11 +10,16 @@ class OrderController extends Controller
     // Create new order
     public function create(Request $request)
     {
-        return Order::create([
+        $order = Order::create([
             'user_id' => $request->user_id,
             'items' => json_encode($request->items),
             'total' => $request->total,
             'status' => 'pending'
+        ]);
+
+        return response()->json([
+            'message' => 'Pesanan berhasil dibuat',
+            'order' => $order
         ]);
     }
 

@@ -1,6 +1,85 @@
 # 📋 RINGKASAN PERUBAHAN - Warung Makan Sederhana
 
-## 🔄 UPDATE TERBARU (v2.0) - Upload Gambar Menu
+## 🔄 UPDATE TERBARU (v3.0) - Payment System
+
+### ✨ Fitur Baru: Sistem Pembayaran
+1. **Payment Confirmation Modal**
+   - Modal konfirmasi pembayaran setelah order dibuat
+   - Tampilan order summary (subtotal, diskon, total)
+   - Pilihan metode pembayaran (4 opsi)
+   - Instruksi pembayaran dinamis per metode
+   - Field notes untuk catatan customer
+
+2. **Payment Methods**
+   - 💵 Cash (Tunai) - bayar saat pengambilan
+   - 🏦 Transfer Bank - BCA 1234567890
+   - 📱 E-Wallet - GoPay/OVO/Dana
+   - 📲 QRIS - Scan QR code
+
+3. **Payment Management**
+   - Create payment record setelah order
+   - Upload bukti pembayaran (non-cash methods)
+   - Admin konfirmasi/tolak pembayaran
+   - Payment status tracking (pending/confirmed/failed)
+   - Auto-update order status saat payment confirmed
+
+4. **Payment API Endpoints**
+   - GET /api/payments - Get all payments
+   - GET /api/payments?user_id={id} - Filter by user
+   - GET /api/payments/order/{orderId} - Get by order
+   - POST /api/payments - Create payment
+   - POST /api/payments/{id}/upload-proof - Upload bukti
+   - POST /api/payments/{id}/confirm - Konfirmasi (Admin)
+   - POST /api/payments/{id}/fail - Tolak (Admin)
+   - DELETE /api/payments/{id} - Delete payment
+
+### 🔧 Perubahan Teknis
+- **Database Migration**: create_payments_table
+  - Fields: order_id, user_id, amount, payment_method, payment_status, payment_proof, notes, paid_at
+  - Enums: payment_method (cash/transfer/ewallet/qris), payment_status (pending/confirmed/failed)
+  - Foreign keys dengan cascade delete
+
+- **Payment Model**: 
+  - Relationships: belongsTo Order, belongsTo User
+  - Fillable: all payment fields
+  - Casts: paid_at to datetime
+
+- **PaymentController**: 
+  - 7 methods untuk CRUD dan workflow
+  - File upload validation (2MB, image types)
+  - Prevent duplicate payments per order
+  - Auto-update order status on confirm
+
+- **warteg.blade.php**: Payment Confirmation Modal
+  - Order summary dengan discount display
+  - Payment method selector dengan emoji
+  - Dynamic payment instructions
+  - Notes textarea
+
+- **app.js**: Payment Flow Implementation
+  - submitOrder() → create order → show payment modal
+  - showPaymentModal() → populate modal dengan order details
+  - updatePaymentInstructions() → dynamic instructions per method
+  - confirmPayment() → create payment → refresh ongoing orders
+  - Event listener untuk payment method change
+
+- **Postman Collection**: Added Payments folder
+  - 8 requests untuk testing payment API
+  - Upload proof dengan multipart/form-data
+  - Admin confirmation requests
+
+### 📚 Documentation
+- **PAYMENT_SYSTEM.md**: Complete payment documentation
+  - Flow diagram
+  - Database schema
+  - API documentation
+  - Frontend implementation
+  - Testing guide
+  - Troubleshooting
+
+═══════════════════════════════════════════════════════════════
+
+## 🔄 UPDATE (v2.0) - Upload Gambar Menu
 
 ### ✨ Fitur Baru
 1. **Upload Gambar Menu**

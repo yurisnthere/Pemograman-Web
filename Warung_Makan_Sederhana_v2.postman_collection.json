@@ -1,0 +1,599 @@
+{
+	"info": {
+		"_postman_id": "warteg-api-collection-2025",
+		"name": "Warung Makan Sederhana API",
+		"description": "Complete API Collection for Warung Makan Sederhana - Food Ordering System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"testuser@example.com\",\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": "{{base_url}}/api/register"
+					}
+				},
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.user && jsonData.user.id) {",
+									"    pm.collectionVariables.set(\"user_id\", jsonData.user.id);",
+									"    pm.collectionVariables.set(\"user_role\", jsonData.user.role);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": "{{base_url}}/api/login"
+					}
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.user && jsonData.user.id) {",
+									"    pm.collectionVariables.set(\"user_id\", jsonData.user.id);",
+									"    pm.collectionVariables.set(\"user_role\", jsonData.user.role);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"user\",\n    \"password\": \"user123\"\n}"
+						},
+						"url": "{{base_url}}/api/login"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/logout"
+					}
+				}
+			]
+		},
+		{
+			"name": "Menu",
+			"item": [
+				{
+					"name": "Get All Menu",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/menu"
+					}
+				},
+				{
+					"name": "Create Menu (No Image)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Nasi Goreng Spesial\",\n    \"price\": 25000,\n    \"category\": \"Nasi\"\n}"
+						},
+						"url": "{{base_url}}/api/menu"
+					}
+				},
+				{
+					"name": "Create Menu (With Image)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Ayam Bakar Madu",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "35000",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "Lauk",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": "{{base_url}}/api/menu"
+					}
+				},
+				{
+					"name": "Update Menu",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Menu Updated",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "30000",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "Lauk",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "_method",
+									"value": "PUT",
+									"type": "text"
+								}
+							]
+						},
+						"url": "{{base_url}}/api/menu/1"
+					}
+				},
+				{
+					"name": "Delete Menu",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/menu/1"
+					}
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/orders"
+					}
+				},
+				{
+					"name": "Get Orders by User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/orders?user_id={{user_id}}"
+					}
+				},
+				{
+					"name": "Create Order (No Promo)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"items\": [\n        {\n            \"menu_item_id\": 1,\n            \"quantity\": 2\n        },\n        {\n            \"menu_item_id\": 2,\n            \"quantity\": 1\n        }\n    ],\n    \"total_price\": 30000\n}"
+						},
+						"url": "{{base_url}}/api/orders"
+					}
+				},
+				{
+					"name": "Create Order (With Promo)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"items\": [\n        {\n            \"menu_item_id\": 1,\n            \"quantity\": 3\n        },\n        {\n            \"menu_item_id\": 2,\n            \"quantity\": 2\n        }\n    ],\n    \"total_price\": 50000,\n    \"promo_code\": \"HEMAT10\",\n    \"discount\": 5000\n}"
+						},
+						"url": "{{base_url}}/api/orders"
+					}
+				},
+				{
+					"name": "Update Order - Process",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"processing\"\n}"
+						},
+						"url": "{{base_url}}/api/orders/1/status"
+					}
+				},
+				{
+					"name": "Update Order - Complete",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"completed\"\n}"
+						},
+						"url": "{{base_url}}/api/orders/1/status"
+					}
+				},
+				{
+					"name": "Update Order - Reject",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"rejected\"\n}"
+						},
+						"url": "{{base_url}}/api/orders/1/status"
+					}
+				}
+			]
+		},
+		{
+			"name": "Promos",
+			"item": [
+				{
+					"name": "Get All Promos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/promos"
+					}
+				},
+				{
+					"name": "Get Active Promos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/promos?active=true"
+					}
+				},
+				{
+					"name": "Validate Promo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"HEMAT10\",\n    \"total_price\": 25000\n}"
+						},
+						"url": "{{base_url}}/api/promos/validate"
+					}
+				},
+				{
+					"name": "Create Promo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"NEWUSER50\",\n    \"description\": \"Diskon 50% untuk pengguna baru\",\n    \"discount_percentage\": 50,\n    \"min_purchase\": 30000,\n    \"valid_from\": \"2025-12-19\",\n    \"valid_until\": \"2026-01-19\",\n    \"is_active\": true\n}"
+						},
+						"url": "{{base_url}}/api/promos"
+					}
+				},
+				{
+					"name": "Update Promo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"NEWUSER40\",\n    \"description\": \"Diskon 40% untuk pengguna baru\",\n    \"discount_percentage\": 40,\n    \"min_purchase\": 25000,\n    \"valid_from\": \"2025-12-19\",\n    \"valid_until\": \"2026-02-19\",\n    \"is_active\": true\n}"
+						},
+						"url": "{{base_url}}/api/promos/1"
+					}
+				},
+				{
+					"name": "Toggle Promo Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/promos/1/toggle"
+					}
+				},
+				{
+					"name": "Delete Promo",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/promos/1"
+					}
+				}
+			]
+		},
+		{
+			"name": "Payments",
+			"item": [
+				{
+					"name": "Get All Payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/payments"
+					}
+				},
+				{
+					"name": "Get Payments by User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/payments?user_id={{user_id}}"
+					}
+				},
+				{
+					"name": "Get Payment by Order ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{base_url}}/api/payments/order/1"
+					}
+				},
+				{
+					"name": "Create Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": 1,\n    \"user_id\": {{user_id}},\n    \"amount\": 25000,\n    \"payment_method\": \"cash\",\n    \"notes\": \"Bayar saat pengambilan\"\n}"
+						},
+						"url": "{{base_url}}/api/payments"
+					}
+				},
+				{
+					"name": "Upload Payment Proof",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "payment_proof",
+									"type": "file",
+									"src": "/path/to/payment-proof.jpg"
+								}
+							]
+						},
+						"url": "{{base_url}}/api/payments/1/upload-proof"
+					}
+				},
+				{
+					"name": "Confirm Payment (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/payments/1/confirm"
+					}
+				},
+				{
+					"name": "Mark Payment as Failed (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/payments/1/fail"
+					}
+				},
+				{
+					"name": "Delete Payment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_id}}"
+							}
+						],
+						"url": "{{base_url}}/api/payments/1"
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "default"
+		},
+		{
+			"key": "user_id",
+			"value": "1",
+			"type": "default"
+		},
+		{
+			"key": "user_role",
+			"value": "admin",
+			"type": "default"
+		}
+	]
+}

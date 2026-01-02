@@ -524,30 +524,123 @@ async function submitOrder() {
   }
 
   const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
+  let discount = 0;
   let total = subtotal;
 
   if (appliedPromo) {
-    const discount = Math.floor((subtotal * appliedPromo.discount_percentage) / 100);
+    discount = Math.floor((subtotal * appliedPromo.discount_percentage) / 100);
     total = subtotal - discount;
   }
 
   try {
-    await fetch('/api/orders', {
+    const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         user_id: currentUser.id,
         items: cart,
-        total
+        total,
+        promo_code: appliedPromo ? appliedPromo.code : null,
+        discount: discount
       })
     });
 
-    alert('Pesanan berhasil dibuat! 🎉');
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert('Gagal membuat pesanan: ' + (data.error || 'Unknown error'));
+      return;
+    }
+
+    // Show payment confirmation modal
+    showPaymentModal(data.order.id, subtotal, discount, total);
+
+  } catch (err) {
+    console.error(err);
+    alert('Gagal membuat pesanan');
+  }
+}
+
+// ======================
+// PAYMENT FUNCTIONS
+// ======================
+let currentOrderId = null;
+
+function showPaymentModal(orderId, subtotal, discount, total) {
+  currentOrderId = orderId;
+
+  document.getElementById('paymentTotalPrice').textContent = formatRupiah(subtotal);
+  document.getElementById('paymentFinalAmount').textContent = formatRupiah(total);
+
+  if (discount > 0 && appliedPromo) {
+    document.getElementById('paymentDiscount').textContent = formatRupiah(discount);
+    document.getElementById('paymentPromoCode').textContent = appliedPromo.code;
+    document.getElementById('paymentDiscountRow').style.display = 'flex';
+  } else {
+    document.getElementById('paymentDiscountRow').style.display = 'none';
+  }
+
+  // Set default payment method
+  document.getElementById('paymentMethod').value = 'cash';
+  updatePaymentInstructions('cash');
+
+  document.getElementById('paymentModal').classList.remove('hidden');
+}
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').classList.add('hidden');
+  document.getElementById('paymentNotes').value = '';
+}
+
+function updatePaymentInstructions(method) {
+  // Payment method is always cash, no need to update instructions
+  return;
+
+async function confirmPayment() {
+  const paymentMethod = 'cash'; // Fixed to cash only
+  const notes = document.getElementById('paymentNotes').value.trim();
+  const total = parseInt(document.getElementById('paymentFinalAmount').textContent.replace(/\./g, ''));
+
+  if (!currentOrderId) {
+    alert('Order ID tidak ditemukan');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/payments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        order_id: currentOrderId,
+        user_id: currentUser.id,
+        amount: total,
+        payment_method: paymentMethod,
+        notes: notes
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert('Gagal membuat pembayaran: ' + (data.error || 'Unknown error'));
+      return;
+    }
+
+    alert('✅ Pembayaran berhasil dikonfirmasi!\n\nPesanan Anda sedang diproses.');
+
+    // Clear cart and close modal
     cart = [];
     appliedPromo = null;
+    currentOrderId = null;
     document.getElementById('promoCode').value = '';
     document.getElementById('promoResult').innerHTML = '';
     renderCart();
+    closePaymentModal();
+
+    // Refresh ongoing orders if on that tab
+    if (currentTab === 'ongoing') {
+      fetchOngoingOrders();
+    }
   } catch (err) {
     console.error(err);
     alert('Gagal membuat pesanan');
@@ -1030,4 +1123,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-});
+
+  // Payment method is fixed to cash, no event listener needed
+});}

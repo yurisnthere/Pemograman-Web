@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PromoController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,4 +47,12 @@ Route::delete('/promos/{id}', [PromoController::class, 'destroy']);
 Route::put('/promos/{id}/toggle', [PromoController::class, 'toggleStatus']);
 Route::post('/promos/validate', [PromoController::class, 'validatePromo']);
 
+// Payment Routes
+Route::get('/payments', [PaymentController::class, 'index']); // All payments or filter by user
+Route::get('/payments/order/{orderId}', [PaymentController::class, 'getByOrder']); // Get payment by order
+Route::post('/payments', [PaymentController::class, 'store']); // Create payment
+Route::post('/payments/{id}/upload-proof', [PaymentController::class, 'uploadProof']); // Upload payment proof
+Route::post('/payments/{id}/confirm', [PaymentController::class, 'confirm']); // Confirm payment (admin)
+Route::post('/payments/{id}/fail', [PaymentController::class, 'markAsFailed']); // Mark as failed (admin)
+Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
 

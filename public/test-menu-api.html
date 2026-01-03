@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Menu API</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .menu-item { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Test Menu API</h1>
+    <button onclick="testAPI()">Load Menu dari API</button>
+    <div id="status"></div>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const statusDiv = document.getElementById('status');
+            const resultDiv = document.getElementById('result');
+
+            statusDiv.innerHTML = 'Loading...';
+            resultDiv.innerHTML = '';
+
+            try {
+                console.log('Fetching from: /api/menu');
+                const response = await fetch('/api/menu');
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                const data = await response.json();
+                console.log('Data received:', data);
+
+                statusDiv.innerHTML = `<p class="success">✓ API berhasil! Total menu: ${data.length}</p>`;
+
+                if (data.length === 0) {
+                    resultDiv.innerHTML = '<p>Tidak ada menu</p>';
+                } else {
+                    resultDiv.innerHTML = data.map(item => `
+                        <div class="menu-item">
+                            <strong>${item.name}</strong><br>
+                            Kategori: ${item.category || 'N/A'}<br>
+                            Harga: Rp ${item.price.toLocaleString('id-ID')}<br>
+                            Image: ${item.image || 'Tidak ada gambar'}
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.innerHTML = `<p class="error">✗ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

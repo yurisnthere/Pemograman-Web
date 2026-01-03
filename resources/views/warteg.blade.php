@@ -12,8 +12,8 @@
 <!-- ======================== -->
 <!-- LOGIN PAGE -->
 <!-- ======================== -->
-<div id="loginPage" class="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+<div id="loginPage" class="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4" style="position: relative; z-index: 100;">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md" style="position: relative; z-index: 101;">
     <div class="text-center mb-8">
       <div class="text-6xl mb-4">🍛</div>
       <h1 class="text-3xl font-bold text-orange-600 mb-2">Warung Makan Sederhana</h1>
@@ -23,16 +23,16 @@
     <div id="loginForm" class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-        <input type="text" id="loginUsername" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" autocomplete="username">
+        <input type="text" id="loginUsername" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" autocomplete="username" placeholder="Masukkan username">
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-        <input type="password" id="loginPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" autocomplete="current-password">
+        <input type="password" id="loginPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" autocomplete="current-password" placeholder="Masukkan password">
       </div>
       <button type="button" onclick="handleLogin()" class="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition">
         Login
       </button>
-      <button onclick="showRegisterForm()" class="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+      <button type="button" onclick="showRegisterForm()" class="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
         Daftar Akun Baru
       </button>
     </div>
@@ -41,24 +41,24 @@
     <div id="registerForm" class="hidden space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-        <input type="text" id="registerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+        <input type="text" id="registerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Nama lengkap Anda">
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-        <input type="email" id="registerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+        <input type="email" id="registerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="email@example.com">
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-        <input type="text" id="registerUsername" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+        <input type="text" id="registerUsername" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Username untuk login">
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Password (min 6 karakter)</label>
-        <input type="password" id="registerPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+        <input type="password" id="registerPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Minimal 6 karakter">
       </div>
-      <button onclick="handleRegister()" class="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition">
+      <button type="button" onclick="handleRegister()" class="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition">
         Daftar
       </button>
-      <button onclick="showLoginForm()" class="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+      <button type="button" onclick="showLoginForm()" class="w-full bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
         Kembali ke Login
       </button>
     </div>
@@ -115,7 +115,12 @@
 
     <!-- Admin Section: Kelola Pesanan -->
     <div id="adminOrderSection" class="bg-white rounded-xl shadow-md p-6 mb-8 hidden">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">📦 Kelola Pesanan</h2>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">📦 Kelola Pesanan</h2>
+        <button onclick="fetchAdminOrders()" class="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition">
+          🔄 Refresh
+        </button>
+      </div>
       <div id="adminOrderList" class="space-y-4"></div>
     </div>
 
@@ -182,13 +187,29 @@
 
     <!-- User Section: Ongoing Orders -->
     <div id="ongoingOrdersSection" class="bg-white rounded-xl shadow-md p-6 mb-8 hidden">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">🔄 Pesanan Berlangsung</h2>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">🔄 Pesanan Berlangsung</h2>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500">⏱️ Auto-refresh setiap 5 detik</span>
+          <button onclick="fetchOngoingOrders()" class="bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-orange-700 transition">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
       <div id="ongoingOrdersList" class="space-y-4"></div>
     </div>
 
     <!-- User Section: Order History -->
     <div id="orderHistorySection" class="bg-white rounded-xl shadow-md p-6 mb-8 hidden">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">📜 Riwayat Pesanan</h2>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">📜 Riwayat Pesanan</h2>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500">⏱️ Auto-refresh setiap 5 detik</span>
+          <button onclick="fetchOrderHistory()" class="bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-orange-700 transition">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
       <div id="orderHistoryList" class="space-y-4"></div>
     </div>
 
@@ -341,5 +362,32 @@
 </div>
 
 <script src="/js/app.js?v={{ time() }}"></script>
-</body>
-</html>
+<script>
+// Ensure all modals are hidden on page load
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM Content Loaded - Initializing page...');
+
+  // Hide modals
+  document.getElementById('menuModal').classList.add('hidden');
+  document.getElementById('promoModal').classList.add('hidden');
+  document.getElementById('mainPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+
+  // Make sure inputs are enabled
+  document.querySelectorAll('input, button').forEach(el => {
+    el.disabled = false;
+    el.style.pointerEvents = 'auto';
+  });
+
+  // Test if buttons work
+  const loginBtn = document.querySelector('#loginForm button[onclick="handleLogin()"]');
+  if (loginBtn) {
+    console.log('Login button found, adding click test listener');
+    loginBtn.addEventListener('click', function() {
+      console.log('Login button clicked via event listener');
+    });
+  } else {
+    console.error('Login button not found!');
+  }
+
+  console.log('Page initialized - login page visible, buttons enabled');

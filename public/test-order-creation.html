@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Order Creation</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px 0; cursor: pointer; }
+        .result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Test Order Creation API</h1>
+    
+    <div>
+        <h3>Step 1: Login dulu</h3>
+        <button onclick="testLogin()">Login sebagai User</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div>
+        <h3>Step 2: Create Order</h3>
+        <button onclick="testCreateOrder()">Buat Pesanan Test</button>
+        <div id="orderResult"></div>
+    </div>
+
+    <script>
+        let testUser = null;
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = 'Logging in...';
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'user',
+                        password: 'user123'
+                    })
+                });
+
+                const data = await res.json();
+                console.log('Login response:', data);
+
+                if (res.ok && data.user) {
+                    testUser = data.user;
+                    resultDiv.innerHTML = `<p class="success">✓ Login berhasil!<br>User: ${data.user.name} (ID: ${data.user.id})</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">✗ Login gagal: ${data.error || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                console.error(error);
+                resultDiv.innerHTML = `<p class="error">✗ Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testCreateOrder() {
+            const resultDiv = document.getElementById('orderResult');
+            
+            if (!testUser) {
+                resultDiv.innerHTML = '<p class="error">Login dulu!</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = 'Creating order...';
+
+            const orderData = {
+                user_id: testUser.id,
+                items: [
+                    { id: 1, name: 'Nasi Putih', price: 5000, quantity: 1 },
+                    { id: 2, name: 'Ayam Goreng', price: 15000, quantity: 1 }
+                ],
+                total: 20000
+            };
+
+            console.log('Creating order with data:', orderData);
+
+            try {
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                const data = await res.json();
+                console.log('Order response:', data);
+
+                if (res.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <strong>✓ Pesanan berhasil dibuat!</strong><br>
+                            Order ID: ${data.order.id}<br>
+                            Total: Rp ${data.order.total.toLocaleString('id-ID')}<br>
+                            Status: ${data.order.status}<br>
+                            Items: ${JSON.stringify(data.order.items, null, 2)}
+                        </div>
+                    `;
+                } else {
+                    const errorMsg = data.messages 
+                        ? JSON.stringify(data.messages, null, 2)
+                        : (data.error || data.message || 'Unknown error');
+                    resultDiv.innerHTML = `<div class="result error">✗ Gagal: ${errorMsg}</div>`;
+                }
+            } catch (error) {
+                console.error(error);
+                resultDiv.innerHTML = `<div class="result error">✗ Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

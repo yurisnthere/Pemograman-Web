@@ -1,6 +1,19 @@
 console.log("app.js loaded");
 
 // ======================
+// UTILITY FUNCTIONS
+// ======================
+function formatRupiah(num) {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return date.toLocaleDateString('id-ID', options);
+}
+
+// ======================
 // STATE
 // ======================
 let currentUser = null;
@@ -10,16 +23,19 @@ let editingMenuId = null;
 let editingPromoId = null;
 let appliedPromo = null;
 let currentTab = '';
+let orderRefreshInterval = null;
 
 // ======================
 // AUTHENTICATION
 // ======================
 function showRegisterForm() {
+  console.log('showRegisterForm called');
   document.getElementById('loginForm').classList.add('hidden');
   document.getElementById('registerForm').classList.remove('hidden');
 }
 
 function showLoginForm() {
+  console.log('showLoginForm called');
   document.getElementById('registerForm').classList.add('hidden');
   document.getElementById('loginForm').classList.remove('hidden');
 }
@@ -119,6 +135,7 @@ async function handleLogin() {
 }
 
 function handleLogout() {
+  stopOrderAutoRefresh(); // Stop auto-refresh on logout
   currentUser = null;
   cart = [];
   appliedPromo = null;
@@ -177,6 +194,9 @@ function renderNavTabs() {
 }
 
 function switchTab(tabId) {
+  // Stop auto-refresh when switching tabs
+  stopOrderAutoRefresh();
+
   currentTab = tabId;
 
   // Update tab buttons
@@ -217,10 +237,12 @@ function switchTab(tabId) {
     case 'ongoing':
       document.getElementById('ongoingOrdersSection').classList.remove('hidden');
       fetchOngoingOrders();
+      startOrderAutoRefresh('ongoing');
       break;
     case 'history':
       document.getElementById('orderHistorySection').classList.remove('hidden');
       fetchOrderHistory();
+      startOrderAutoRefresh('history');
       break;
     case 'promos':
       document.getElementById('userPromoSection').classList.remove('hidden');
@@ -233,13 +255,28 @@ function switchTab(tabId) {
 // MENU FUNCTIONS
 // ======================
 async function fetchMenu() {
-  const res = await fetch('/api/menu');
-  menuItems = await res.json();
+  try {
+    console.log('Fetching menu from /api/menu...');
+    const res = await fetch('/api/menu');
 
-  if (currentUser.role === 'admin') {
-    renderAdminMenuList();
-  } else {
-    renderMenu();
+    console.log('Response status:', res.status);
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    menuItems = await res.json();
+    console.log('Menu items loaded:', menuItems.length);
+
+    if (currentUser.role === 'admin') {
+      renderAdminMenuList();
+    } else {
+      renderMenu();
+    }
+  } catch (error) {
+    console.error('Error fetching menu:', error);
+    alert('Gagal memuat menu: ' + error.message);
+    menuItems = [];
   }
 }
 
@@ -523,6 +560,11 @@ async function submitOrder() {
     return;
   }
 
+  if (!currentUser || !currentUser.id) {
+    alert('User tidak valid. Silakan login ulang.');
+    return;
+  }
+
   const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
   let discount = 0;
   let total = subtotal;
@@ -533,22 +575,30 @@ async function submitOrder() {
   }
 
   try {
+    console.log('Creating order with data:', {
+      user_id: currentUser.id,
+      items: cart,
+      total: total
+    });
+
     const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         user_id: currentUser.id,
         items: cart,
-        total,
-        promo_code: appliedPromo ? appliedPromo.code : null,
-        discount: discount
+        total: total
       })
     });
 
     const data = await res.json();
+    console.log('Order response:', data);
 
     if (!res.ok) {
-      alert('Gagal membuat pesanan: ' + (data.error || 'Unknown error'));
+      const errorMsg = data.messages
+        ? Object.values(data.messages).flat().join(', ')
+        : (data.error || data.message || 'Unknown error');
+      alert('Gagal membuat pesanan: ' + errorMsg);
       return;
     }
 
@@ -556,8 +606,8 @@ async function submitOrder() {
     showPaymentModal(data.order.id, subtotal, discount, total);
 
   } catch (err) {
-    console.error(err);
-    alert('Gagal membuat pesanan');
+    console.error('Error creating order:', err);
+    alert('Gagal membuat pesanan: ' + err.message);
   }
 }
 
@@ -567,24 +617,34 @@ async function submitOrder() {
 let currentOrderId = null;
 
 function showPaymentModal(orderId, subtotal, discount, total) {
+  console.log('showPaymentModal called with:', { orderId, subtotal, discount, total });
   currentOrderId = orderId;
 
-  document.getElementById('paymentTotalPrice').textContent = formatRupiah(subtotal);
-  document.getElementById('paymentFinalAmount').textContent = formatRupiah(total);
+  const paymentTotalPrice = document.getElementById('paymentTotalPrice');
+  const paymentFinalAmount = document.getElementById('paymentFinalAmount');
+  const paymentDiscount = document.getElementById('paymentDiscount');
+  const paymentPromoCode = document.getElementById('paymentPromoCode');
+  const paymentDiscountRow = document.getElementById('paymentDiscountRow');
+  const paymentModal = document.getElementById('paymentModal');
 
-  if (discount > 0 && appliedPromo) {
-    document.getElementById('paymentDiscount').textContent = formatRupiah(discount);
-    document.getElementById('paymentPromoCode').textContent = appliedPromo.code;
-    document.getElementById('paymentDiscountRow').style.display = 'flex';
-  } else {
-    document.getElementById('paymentDiscountRow').style.display = 'none';
+  if (!paymentTotalPrice || !paymentFinalAmount || !paymentModal) {
+    console.error('Payment modal elements not found!');
+    alert('Error: Payment modal tidak ditemukan. Refresh halaman.');
+    return;
   }
 
-  // Set default payment method
-  document.getElementById('paymentMethod').value = 'cash';
-  updatePaymentInstructions('cash');
+  paymentTotalPrice.textContent = formatRupiah(subtotal);
+  paymentFinalAmount.textContent = formatRupiah(total);
 
-  document.getElementById('paymentModal').classList.remove('hidden');
+  if (discount > 0 && appliedPromo && paymentDiscount && paymentPromoCode && paymentDiscountRow) {
+    paymentDiscount.textContent = formatRupiah(discount);
+    paymentPromoCode.textContent = appliedPromo.code;
+    paymentDiscountRow.style.display = 'flex';
+  } else if (paymentDiscountRow) {
+    paymentDiscountRow.style.display = 'none';
+  }
+
+  paymentModal.classList.remove('hidden');
 }
 
 function closePaymentModal() {
@@ -595,6 +655,7 @@ function closePaymentModal() {
 function updatePaymentInstructions(method) {
   // Payment method is always cash, no need to update instructions
   return;
+}
 
 async function confirmPayment() {
   const paymentMethod = 'cash'; // Fixed to cash only
@@ -650,34 +711,71 @@ async function confirmPayment() {
 // ======================
 // ORDER FUNCTIONS (USER)
 // ======================
+function startOrderAutoRefresh(type) {
+  // Clear existing interval
+  stopOrderAutoRefresh();
+
+  // Refresh every 5 seconds
+  orderRefreshInterval = setInterval(() => {
+    console.log('Auto-refreshing orders...');
+    if (type === 'ongoing') {
+      fetchOngoingOrders();
+    } else if (type === 'history') {
+      fetchOrderHistory();
+    }
+  }, 5000); // 5 seconds
+
+  console.log('Auto-refresh started for', type);
+}
+
+function stopOrderAutoRefresh() {
+  if (orderRefreshInterval) {
+    clearInterval(orderRefreshInterval);
+    orderRefreshInterval = null;
+    console.log('Auto-refresh stopped');
+  }
+}
+
 async function fetchOngoingOrders() {
   try {
+    console.log('Fetching ongoing orders for user:', currentUser.id);
     const res = await fetch(`/api/orders/user/${currentUser.id}/ongoing`);
     const orders = await res.json();
+    console.log('Ongoing orders received:', orders);
     renderOrders(orders, 'ongoingOrdersList', true);
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching ongoing orders:', err);
   }
 }
 
 async function fetchOrderHistory() {
   try {
+    console.log('Fetching order history for user:', currentUser.id);
     const res = await fetch(`/api/orders/user/${currentUser.id}/history`);
     const orders = await res.json();
+    console.log('Order history received:', orders);
     renderOrders(orders, 'orderHistoryList', false);
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching order history:', err);
   }
 }
 
 function renderOrders(orders, containerId, isOngoing) {
   const container = document.getElementById(containerId);
+
+  if (!container) {
+    console.error('Container not found:', containerId);
+    return;
+  }
+
   container.innerHTML = '';
 
   if (orders.length === 0) {
     container.innerHTML = '<p class="text-center text-gray-500 py-8">Tidak ada pesanan</p>';
     return;
   }
+
+  console.log('Rendering orders to:', containerId, 'Count:', orders.length);
 
   orders.forEach(order => {
     const div = document.createElement('div');
@@ -697,7 +795,19 @@ function renderOrders(orders, containerId, isOngoing) {
       rejected: '❌ Ditolak'
     };
 
-    const items = JSON.parse(order.items || '[]');
+    // Handle items as string or array
+    let items = [];
+    try {
+      if (typeof order.items === 'string') {
+        items = JSON.parse(order.items);
+      } else if (Array.isArray(order.items)) {
+        items = order.items;
+      }
+    } catch (e) {
+      console.error('Error parsing items for order', order.id, e);
+      items = [];
+    }
+
     const itemsList = items.map(item => `<li>${item.name} - Rp ${formatRupiah(item.price)}</li>`).join('');
 
     div.innerHTML = `
@@ -723,22 +833,32 @@ function renderOrders(orders, containerId, isOngoing) {
 // ======================
 async function fetchAdminOrders() {
   try {
+    console.log('Fetching all orders for admin...');
     const res = await fetch('/api/orders');
     const orders = await res.json();
+    console.log('Admin orders received:', orders.length, 'orders');
     renderAdminOrders(orders);
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching admin orders:', err);
   }
 }
 
 function renderAdminOrders(orders) {
   const container = document.getElementById('adminOrderList');
+
+  if (!container) {
+    console.error('Admin order container not found!');
+    return;
+  }
+
   container.innerHTML = '';
 
   if (orders.length === 0) {
     container.innerHTML = '<p class="text-center text-gray-500 py-8">Belum ada pesanan</p>';
     return;
   }
+
+  console.log('Rendering admin orders, count:', orders.length);
 
   orders.forEach(order => {
     const div = document.createElement('div');
@@ -751,7 +871,19 @@ function renderAdminOrders(orders) {
       rejected: 'bg-red-100 text-red-800'
     };
 
-    const items = JSON.parse(order.items || '[]');
+    // Handle items as string or array
+    let items = [];
+    try {
+      if (typeof order.items === 'string') {
+        items = JSON.parse(order.items);
+      } else if (Array.isArray(order.items)) {
+        items = order.items;
+      }
+    } catch (e) {
+      console.error('Error parsing items for admin order', order.id, e);
+      items = [];
+    }
+
     const itemsList = items.map(item => `<li>${item.name} - Rp ${formatRupiah(item.price)}</li>`).join('');
 
     const userName = order.user ? order.user.name || order.user.username : 'Unknown';
@@ -1055,18 +1187,7 @@ function closePromoModal() {
 }
 
 // ======================
-// UTILITY FUNCTIONS
-// ======================
-function formatRupiah(num) {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
-  return date.toLocaleDateString('id-ID', options);
-}
-
+// INITIALIZATION
 // ======================
 // IMAGE PREVIEW & EVENT LISTENERS
 // ======================
@@ -1125,4 +1246,4 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Payment method is fixed to cash, no event listener needed
-});}
+});
